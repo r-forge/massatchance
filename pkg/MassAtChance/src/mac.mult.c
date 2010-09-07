@@ -198,51 +198,51 @@ SEXP MassAtChance1P(SEXP yR, SEXP NR, SEXP nSamp, SEXP mu0R, SEXP sig20R, SEXP a
       //sumBalpha+=Balpha[0];
       maxBalpha=Balpha[0];
       for(p=1;p<(J+1);p++){
-	falpha[p]=0;
-	galpha[p]=0;
-	halpha[p]=0;
-	sumN=0;
-	probBalpha=0;
-	for(j=0;j<J;j++){
-	  D=mu[j]>sortMu[J-p-1];
-	  if(D||(p==J)){  
-	    halpha[p]+=N[i][j]*pow(mu[j],2)-2*mu[j]*wSum[i][j];
-	    galpha[p]+=wSum[i][j]-N[i][j]*mu[j];
-	    sumN+=N[i][j];
-	    }
-	}
-	falpha[p]=1/(1/sig2+sumN);
-	galpha[p]=galpha[p]*falpha[p];
-        if(p==J){  
-	  Balpha[p]=-.5*(halpha[p]-pow(galpha[p],2)/falpha[p])+.5*log(falpha[p])+pnorm((sortMu[0]+galpha[p])/sqrt(falpha[p]),0,1,1,1); 
+			falpha[p]=0;
+			galpha[p]=0;
+			halpha[p]=0;
+			sumN=0;
+			probBalpha=0;
+			for(j=0;j<J;j++){
+				D=mu[j]>sortMu[J-p-1];
+				if(D||(p==J)){  
+					halpha[p]+=N[i][j]*pow(mu[j],2)-2*mu[j]*wSum[i][j];
+					galpha[p]+=wSum[i][j]-N[i][j]*mu[j];
+					sumN+=N[i][j];
+				}
+			}
+			falpha[p]=1/(1/sig2+sumN);
+			galpha[p]=galpha[p]*falpha[p];
+			if(p==J){  
+				Balpha[p]=-.5*(halpha[p]-pow(galpha[p],2)/falpha[p])+.5*log(falpha[p])+pnorm((sortMu[0]+galpha[p])/sqrt(falpha[p]),0,1,1,1); 
 
-	}else{
-	  Balpha[p]=expXphiAminusphiB(-.5*(halpha[p]-pow(galpha[p],2)/falpha[p])+.5*log(falpha[p]),
-	  		(-sortMu[J-p-1]-galpha[p])/sqrt(falpha[p]),(-sortMu[J-p]-galpha[p])/sqrt(falpha[p]),1); 
+			}else{
+				Balpha[p]=expXphiAminusphiB(-.5*(halpha[p]-pow(galpha[p],2)/falpha[p])+.5*log(falpha[p]),
+					(-sortMu[J-p-1]-galpha[p])/sqrt(falpha[p]),(-sortMu[J-p]-galpha[p])/sqrt(falpha[p]),1); 
 
-	}
-	if(Balpha[p]>maxBalpha){maxBalpha=Balpha[p];}
-      }
-      for(p=0;p<(J+1);p++){
-	Balpha[p]=exp(Balpha[p]-maxBalpha);
-	sumBalpha+=Balpha[p];
-      }
-      regionAlphaUnif=runif(0,1);
-      for(p=0;p<(J+1);p++){
-	probBalpha+=Balpha[p]/sumBalpha;
-	if(regionAlphaUnif>probBalpha) regionAlpha=p+1;
-      }
-      if(regionAlpha==0){
-	alpha[i]=ran_trunc_norm_lower(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[J-1]);
-      }else if(regionAlpha==J){
-	alpha[i]=ran_trunc_norm_upper(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[0]);
-      }else{
-	alpha[i]=ran_trunc_norm_both(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[J-regionAlpha],-sortMu[J-regionAlpha-1]);
-      }
-      sumAlpha+=alpha[i];
-      sumAlphSqr+=pow(alpha[i],2);
-      sumAllAlpha[i]+=alpha[i];
-      sortAlpha[i]=alpha[i];
+			}
+			if(Balpha[p]>maxBalpha){maxBalpha=Balpha[p];}
+		}
+		for(p=0;p<(J+1);p++){
+			Balpha[p]=exp(Balpha[p]-maxBalpha);
+			sumBalpha+=Balpha[p];
+		}
+		regionAlphaUnif=runif(0,1);
+		for(p=0;p<(J+1);p++){
+			probBalpha+=Balpha[p]/sumBalpha;
+			if(regionAlphaUnif>probBalpha) regionAlpha=p+1;
+		}
+		if(regionAlpha==0){
+			alpha[i]=ran_trunc_norm_lower(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[J-1]);
+		}else if(regionAlpha==J){
+			alpha[i]=ran_trunc_norm_upper(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[0]);
+		}else{
+			alpha[i]=ran_trunc_norm_both(galpha[regionAlpha], sqrt(falpha[regionAlpha]), -sortMu[J-regionAlpha],-sortMu[J-regionAlpha-1]);
+		}
+		sumAlpha+=alpha[i];
+		sumAlphSqr+=pow(alpha[i],2);
+		sumAllAlpha[i]+=alpha[i];
+		sortAlpha[i]=alpha[i];
       //fprintf(CHAINS,"%f ",alpha[i]);
     }
     /*end alpha*/
@@ -270,43 +270,43 @@ SEXP MassAtChance1P(SEXP yR, SEXP NR, SEXP nSamp, SEXP mu0R, SEXP sig20R, SEXP a
       Bmu[0]=-.5*(hmu[0]-pow(gmu[0],2)/fmu[0])+.5*log(fmu[0])+pnorm((-sortAlpha[I-1]-gmu[0])/sqrt(fmu[0]),0,1,1,1);
       maxBmu=Bmu[0];
       for(p=1;p<(I+1);p++){
-	fmu[p]=0;
-	gmu[p]=0;
-	hmu[p]=0;
-	sumN=0;
-	probBmu=0;
-	for(i=0;i<I;i++){
-	  D=alpha[i]>sortAlpha[I-p-1];
-	  if(D||p==I){  
-	    hmu[p]+=N[i][j]*pow(alpha[i],2)-2*alpha[i]*wSum[i][j];
-	    gmu[p]+=wSum[i][j]-N[i][j]*alpha[i];
-	    sumN+=N[i][j];
+		fmu[p]=0;
+		gmu[p]=0;
+		hmu[p]=0;
+		sumN=0;
+		probBmu=0;
+		for(i=0;i<I;i++){
+			D=alpha[i]>sortAlpha[I-p-1];
+			if(D||p==I){  
+				hmu[p]+=N[i][j]*pow(alpha[i],2)-2*alpha[i]*wSum[i][j];
+				gmu[p]+=wSum[i][j]-N[i][j]*alpha[i];
+				sumN+=N[i][j];
+			}
+		}
+		fmu[p]=1/(1/sig20+sumN);
+		gmu[p]=(mu0/sig20+gmu[p])*fmu[p];
+		if(p==I){ 
+			Bmu[p]=-.5*(hmu[p]-pow(gmu[p],2)/fmu[p])+.5*log(fmu[p])+pnorm((sortAlpha[0]+gmu[p])/sqrt(fmu[p]),0,1,1,1);
+		}else{ 
+			Bmu[p]=expXphiAminusphiB(-.5*(hmu[p]-pow(gmu[p],2)/fmu[p])+.5*log(fmu[p]), (-sortAlpha[I-p-1]-gmu[p])/sqrt(fmu[p]), (-sortAlpha[I-p]-gmu[p])/sqrt(fmu[p]), 1);
+		}
+		if(Bmu[p]>maxBmu){maxBmu=Bmu[p];}
 	  }
-	}
-	fmu[p]=1/(1/sig20+sumN);
-	gmu[p]=(mu0/sig20+gmu[p])*fmu[p];
-	if(p==I){ 
-	  Bmu[p]=-.5*(hmu[p]-pow(gmu[p],2)/fmu[p])+.5*log(fmu[p])+pnorm((sortAlpha[0]+gmu[p])/sqrt(fmu[p]),0,1,1,1);
-	}else{ 
-          Bmu[p]=expXphiAminusphiB(-.5*(hmu[p]-pow(gmu[p],2)/fmu[p])+.5*log(fmu[p]), (-sortAlpha[I-p-1]-gmu[p])/sqrt(fmu[p]), (-sortAlpha[I-p]-gmu[p])/sqrt(fmu[p]), 1);
-	}
-	if(Bmu[p]>maxBmu){maxBmu=Bmu[p];}
-      }
       for(p=0;p<(I+1);p++){
-	Bmu[p]=exp(Bmu[p]-maxBmu);
-	sumBmu+=Bmu[p];
+		Bmu[p]=exp(Bmu[p]-maxBmu);
+		sumBmu+=Bmu[p];
       }
       regionMuUnif=runif(0,1);
       for(p=0;p<(I+1);p++){
-	probBmu+=Bmu[p]/sumBmu;
-	if(regionMuUnif>probBmu) regionMu=p+1;
+		probBmu+=Bmu[p]/sumBmu;
+		if(regionMuUnif>probBmu) regionMu=p+1;
       }
       if(regionMu==0){
-	mu[j]=ran_trunc_norm_lower(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[I-1]);
+		mu[j]=ran_trunc_norm_lower(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[I-1]);
       }else if(regionMu==I){
-	mu[j]=ran_trunc_norm_upper(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[0]);
+		mu[j]=ran_trunc_norm_upper(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[0]);
       }else{
-	mu[j]=ran_trunc_norm_both(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[I-regionMu],-sortAlpha[I-regionMu-1]);
+		mu[j]=ran_trunc_norm_both(gmu[regionMu], sqrt(fmu[regionMu]), -sortAlpha[I-regionMu],-sortAlpha[I-regionMu-1]);
       }
       sumAllMu[j]+=mu[j];
       sortMu[j]=mu[j];
